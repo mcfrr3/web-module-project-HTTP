@@ -6,6 +6,7 @@ import axios from 'axios';
 
 const EditMovieForm = (props) => {
 	const { push } = useHistory();
+	const { id } = useParams();
 
 	const { setMovies } = props;
 	const [movie, setMovie] = useState({
@@ -15,7 +16,17 @@ const EditMovieForm = (props) => {
 		metascore: 0,
 		description: ""
 	});
-	
+
+	const getCurrentMovie = movieId => {
+		axios.get(`http://localhost:9000/api/movies/${movieId}`)
+			.then(res => {
+				setMovie(res.data);
+			})
+			.catch(err => {
+				debugger
+			});
+	}
+
 	const handleChange = (e) => {
         setMovie({
             ...movie,
@@ -23,21 +34,25 @@ const EditMovieForm = (props) => {
         });
     }
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        axios.put(`http://localhost:9000/api/movies/${id}`, movie)
-            .then(res=>{
-                setMovies(res.data);
-                push(`/movies/${movie.id}`);
-			})
-			.catch(err=>{
-				console.log(err);
-			})
+	const handleSubmit = (e) => {
+		e.preventDefault();
+		axios.put(`http://localhost:9000/api/movies/${id}`, movie)
+		.then(res=>{
+			setMovies(res.data);
+			push(`/movies/${movie.id}`);
+		})
+		.catch(err=>{
+			console.log(err);
+		})
 	}
 	
+	useEffect(() => {
+		getCurrentMovie(id);
+	}, [])
+
 	const { title, director, genre, metascore, description } = movie;
 
-    return (
+	return (
 	<div className="col">
 		<div className="modal-content">
 			<form onSubmit={handleSubmit}>
@@ -68,8 +83,8 @@ const EditMovieForm = (props) => {
 									
 				</div>
 				<div className="modal-footer">			    
-					<input type="submit" className="btn btn-info" value="Save"/>
-					<Link to={`/movies/1`}><input type="button" className="btn btn-default" value="Cancel"/></Link>
+					<input type="submit" className="btn btn-info" value="Save" onClick={handleSubmit}/>
+					<Link to={`/movies/${id}`}><input type="button" className="btn btn-default" value="Cancel"/></Link>
 				</div>
 			</form>
 		</div>
